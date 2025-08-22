@@ -2,7 +2,7 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-import { getImagesByQuery } from './js/pixabay-api.js';
+import { getImagesByQuery, PerPage } from './js/pixabay-api.js';
 
 import {
   createGallery,
@@ -25,7 +25,12 @@ form.addEventListener('submit', async event => {
   query = event.target.searchQuery.value.trim();
 
   if (!query) {
-    iziToast.error({ message: 'Please enter a search query!' });
+    iziToast.error({
+      title: 'Error',
+      message: 'Please enter a search query!',
+      position: 'topRight',
+      backgroundColor: '#ef4040',
+    });
     return;
   }
 
@@ -39,11 +44,11 @@ form.addEventListener('submit', async event => {
     totalHits = data.totalHits;
 
     if (data.hits.length === 0) {
-      iziToast.info({
+      iziToast.error({
         title: 'No results',
         message:
           'Sorry, there are no images matching your search query. Please try again!',
-        position: 'center',
+        position: 'topRight',
         backgroundColor: '#ef4040',
       });
       hideLoader();
@@ -53,14 +58,21 @@ form.addEventListener('submit', async event => {
     createGallery(data.hits);
     hideLoader();
 
-    if (totalHits > page * 15) {
+    if (totalHits > page * PerPage) {
       showLoadMoreButton();
+    } else {
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+        backgroundColor: '#ef4040',
+      });
     }
   } catch (error) {
     iziToast.error({
       title: 'Error',
       message: 'Something went wrong. Please try again later.',
       position: 'topRight',
+      backgroundColor: '#ef4040',
     });
     hideLoader();
   }
@@ -77,16 +89,23 @@ loadMoreBtn.addEventListener('click', async () => {
     hideLoader();
     smoothScroll();
 
-    if (page * 15 >= totalHits) {
+    if (page * PerPage >= totalHits) {
       hideLoadMoreButton();
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+        backgroundColor: '#ef4040',
       });
     } else {
       showLoadMoreButton();
     }
   } catch (error) {
-    iziToast.error({ message: 'Something went wrong. Try again later.' });
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Try again later.',
+      position: 'topRight',
+      backgroundColor: '#ef4040',
+    });
     hideLoader();
   }
 });
